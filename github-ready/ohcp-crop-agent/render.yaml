@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ohcp-crop-agent-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: JAVA_TOOL_OPTIONS
+        value: -Xmx384m

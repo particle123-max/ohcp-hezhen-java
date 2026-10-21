@@ -1,0 +1,31 @@
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: ohcp-crop-agent
+  jackson:
+    default-property-inclusion: non_null
+  ai:
+    openai:
+      # 默认不调用大模型；保留占位值避免可选组件影响离线启动。
+      api-key: ${OPENAI_API_KEY:demo-key-not-used}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+          temperature: 0.2
+
+app:
+  knowledge:
+    external-file: ${KNOWLEDGE_FILE:data/knowledge-base.json}
+  llm:
+    enabled: ${APP_LLM_ENABLED:false}
+    # 大模型只润色科普表达，不参与缺素判断和施肥方案事实生成。
+    max-output-chars: 260
+
+logging:
+  level:
+    root: INFO
+    com.ohcp.cropagent: INFO

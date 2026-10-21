@@ -1,0 +1,17 @@
+[build]
+  publish = "src/main/resources/static"
+  command = "echo Static frontend: no build step required"
+
+# 将后端的公开地址替换到下面，例如：
+# to = "https://ohcp-crop-agent-api.onrender.com/api/:splat"
+[[redirects]]
+  from = "/api/*"
+  to = "https://YOUR-BACKEND.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# 单页应用兜底
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

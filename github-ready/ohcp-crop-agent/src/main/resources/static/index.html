@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="农作物缺素症识别与科学施肥建议智能体，基于本地知识库 RAG，可离线演示。">
+    <title>禾诊 · 农作物缺素症智能体</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="page-glow page-glow-a"></div>
+<div class="page-glow page-glow-b"></div>
+
+<header class="topbar">
+    <a class="brand" href="#top" aria-label="返回顶部">
+        <span class="brand-mark" aria-hidden="true">禾</span>
+        <span>
+            <strong>禾诊</strong>
+            <small>OHCP Crop Agent</small>
+        </span>
+    </a>
+    <div class="topbar-tags" aria-label="系统特性">
+        <span>本地 RAG</span>
+        <span>断网可演示</span>
+        <span>来源可追溯</span>
+    </div>
+</header>
+
+<main id="top">
+    <section class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow">一叶知缺 · 科学施肥</p>
+            <h1>让每一片异常叶片，<br><em>都说清楚缺了什么。</em></h1>
+            <p class="hero-lead">
+                输入作物、症状部位与田间表现，系统优先检索本地私有知识库，
+                给出多个缺素候选、匹配置信度、风险预警和可执行的科学施肥方案。
+            </p>
+            <div class="hero-metrics">
+                <div class="metric">
+                    <strong id="heroEntryCount">8</strong>
+                    <span>类缺素知识</span>
+                </div>
+                <div class="metric">
+                    <strong>100%</strong>
+                    <span>核心识别本地完成</span>
+                </div>
+                <div class="metric">
+                    <strong id="heroQueryCount">0</strong>
+                    <span>次现场诊断</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+            <div class="field-card">
+                <div class="field-sun"></div>
+                <div class="field-leaf leaf-a"></div>
+                <div class="field-leaf leaf-b"></div>
+                <div class="field-leaf leaf-c"></div>
+                <div class="field-stem"></div>
+                <div class="scan-line"></div>
+                <div class="data-chip chip-a"><span>N</span> 老叶黄化</div>
+                <div class="data-chip chip-b"><span>K</span> 叶缘焦枯</div>
+                <div class="data-chip chip-c"><span>Fe</span> 新叶失绿</div>
+            </div>
+            <div class="visual-caption">
+                <span class="pulse-dot"></span>
+                本地知识库实时检索
+            </div>
+        </div>
+    </section>
+
+    <section class="workspace" aria-label="缺素症诊断工作区">
+        <form id="diagnosisForm" class="input-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="section-kicker">01 / 田间信息</p>
+                    <h2>描述作物长势</h2>
+                </div>
+                <span class="required-note"><i>*</i> 为必填项</span>
+            </div>
+
+            <div class="sample-row">
+                <span>快速样例</span>
+                <button type="button" class="sample-chip" data-sample="rice-n">水稻缺氮</button>
+                <button type="button" class="sample-chip" data-sample="wheat-k">小麦缺钾</button>
+                <button type="button" class="sample-chip" data-sample="maize-zn">玉米缺锌</button>
+                <button type="button" class="sample-chip" data-sample="tomato-ca">番茄缺钙</button>
+            </div>
+
+            <div class="form-grid">
+                <label class="field">
+                    <span>作物类型 <i>*</i></span>
+                    <select id="crop" name="crop" required>
+                        <option value="水稻">水稻</option>
+                        <option value="小麦">小麦</option>
+                        <option value="玉米">玉米</option>
+                        <option value="油菜">油菜</option>
+                        <option value="番茄">番茄</option>
+                        <option value="马铃薯">马铃薯</option>
+                        <option value="大豆">大豆</option>
+                        <option value="柑橘">柑橘</option>
+                        <option value="蔬菜">蔬菜</option>
+                        <option value="其他">其他作物</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>症状部位 <i>*</i></span>
+                    <select id="part" name="part" required>
+                        <option value="下部老叶">下部老叶</option>
+                        <option value="新叶">新叶 / 嫩叶</option>
+                        <option value="叶缘">叶缘</option>
+                        <option value="叶脉间">叶脉间</option>
+                        <option value="生长点">生长点</option>
+                        <option value="茎秆">茎秆</option>
+                        <option value="根系">根系</option>
+                        <option value="果实">果实</option>
+                        <option value="全株">全株</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>生育期</span>
+                    <select id="growthStage" name="growthStage">
+                        <option value="苗期">苗期</option>
+                        <option value="分蘖期">分蘖期</option>
+                        <option value="拔节期">拔节期</option>
+                        <option value="开花期">开花期</option>
+                        <option value="灌浆期">灌浆期</option>
+                        <option value="成熟期">成熟期</option>
+                        <option value="未知">不确定</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>土壤类型</span>
+                    <select id="soilType" name="soilType">
+                        <option value="壤土">壤土</option>
+                        <option value="沙质土">沙质土</option>
+                        <option value="黏土">黏土</option>
+                        <option value="酸性土">酸性土</option>
+                        <option value="石灰性土">石灰性土</option>
+                        <option value="盐渍化土">盐渍化土</option>
+                        <option value="未知">不确定</option>
+                    </select>
+                </label>
+            </div>
+
+            <label class="field field-full">
+                <span>症状表现 <i>*</i><small id="charCount">0 / 600</small></span>
+                <textarea id="symptoms" name="symptoms" maxlength="600" required
+                          placeholder="例如：水稻叶片从下部老叶开始均匀发黄，植株矮小，分蘖减少。"></textarea>
+            </label>
+
+            <label class="field field-full">
+                <span>发生环境</span>
+                <select id="environment" name="environment">
+                    <option value="近期降雨较多，田间湿度偏高">近期降雨较多，田间湿度偏高</option>
+                    <option value="近期干旱，土壤墒情不足">近期干旱，土壤墒情不足</option>
+                    <option value="低温寡照">低温寡照</option>
+                    <option value="连续阴雨或积水">连续阴雨或积水</option>
+                    <option value="连作地块">连作地块</option>
+                    <option value="正常">环境基本正常</option>
+                </select>
+            </label>
+
+            <div id="formError" class="form-error" role="alert" hidden></div>
+
+            <button id="diagnoseButton" class="primary-button" type="submit">
+                <span class="button-label">开始智能诊断</span>
+                <span class="button-icon" aria-hidden="true">→</span>
+                <span class="spinner" aria-hidden="true"></span>
+            </button>
+            <p class="privacy-note">诊断在本地服务完成；默认不调用大模型，也不上传田间数据。</p>
+        </form>
+
+        <aside class="knowledge-panel">
+            <p class="section-kicker">02 / 检索增强</p>
+            <h2>先查知识，再给建议</h2>
+            <ol class="flow-list">
+                <li>
+                    <span>01</span>
+                    <div><strong>症状结构化</strong><small>作物 + 部位 + 表现 + 环境</small></div>
+                </li>
+                <li>
+                    <span>02</span>
+                    <div><strong>本地知识检索</strong><small>关键词加权 + 中文双字组相似度</small></div>
+                </li>
+                <li>
+                    <span>03</span>
+                    <div><strong>候选与风险重排</strong><small>输出多个可能缺素及置信度</small></div>
+                </li>
+                <li>
+                    <span>04</span>
+                    <div><strong>方案模板生成</strong><small>农户版 / 农技版双视角</small></div>
+                </li>
+            </ol>
+            <div class="knowledge-status">
+                <div>
+                    <span>知识库版本</span>
+                    <strong id="kbVersion">加载中</strong>
+                </div>
+                <div>
+                    <span>检索方式</span>
+                    <strong>JSON RAG</strong>
+                </div>
+                <div>
+                    <span>大模型依赖</span>
+                    <strong>可选</strong>
+                </div>
+            </div>
+            <p class="knowledge-hint">
+                <span aria-hidden="true">i</span>
+                结果用于辅助判断，不替代测土配方与当地农技人员现场诊断。
+            </p>
+        </aside>
+    </section>
+
+    <section id="results" class="results" hidden aria-live="polite">
+        <div class="results-heading">
+            <div>
+                <p class="section-kicker">03 / 诊断结果</p>
+                <h2 id="resultTitle">正在分析田间信号</h2>
+                <p id="resultSummary" class="result-summary"></p>
+            </div>
+            <div class="engine-badge" id="engineBadge">LOCAL_RAG</div>
+        </div>
+
+        <div class="diagnosis-grid">
+            <article class="primary-card">
+                <div class="diagnosis-main">
+                    <div id="confidenceRing" class="confidence-ring" style="--confidence: 0">
+                        <div>
+                            <strong id="topConfidence">0%</strong>
+                            <span>匹配置信度</span>
+                        </div>
+                    </div>
+                    <div class="diagnosis-name">
+                        <span class="nutrient-symbol" id="topSymbol">N</span>
+                        <div>
+                            <small>首要候选</small>
+                            <h3 id="topNutrient">缺氮</h3>
+                            <p id="topRationale"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="candidate-list">
+                    <div class="candidate-header">
+                        <span>多候选结果</span>
+                        <small>基于本地知识证据排序</small>
+                    </div>
+                    <div id="candidateList"></div>
+                </div>
+            </article>
+
+            <article class="risk-card" id="riskCard">
+                <div class="risk-topline">
+                    <span>田间风险预警</span>
+                    <strong id="riskLabel">--</strong>
+                </div>
+                <div class="risk-score-row">
+                    <strong id="riskScore">0</strong>
+                    <span>/ 100</span>
+                    <div class="risk-meter"><i id="riskMeter"></i></div>
+                </div>
+                <ul id="riskFactors"></ul>
+                <p id="riskSuggestion"></p>
+            </article>
+        </div>
+
+        <article class="advice-card">
+            <div class="advice-heading">
+                <div>
+                    <p class="section-kicker">04 / 科学施肥建议</p>
+                    <h3 id="adviceTitle">针对性方案</h3>
+                </div>
+                <div class="template-tabs" role="tablist" aria-label="建议版本">
+                    <button type="button" class="tab-button active" data-tab="farmer" role="tab">农户简易版</button>
+                    <button type="button" class="tab-button" data-tab="expert" role="tab">农技专业版</button>
+                </div>
+            </div>
+
+            <div class="quick-advice" data-panel="farmer">
+                <span class="quick-label">一句话建议</span>
+                <p id="farmerAdvice"></p>
+            </div>
+            <div class="quick-advice expert-advice" data-panel="expert" hidden>
+                <span class="quick-label">专业判断</span>
+                <p id="expertAdvice"></p>
+            </div>
+
+            <p id="adviceIntro" class="advice-intro"></p>
+
+            <div class="advice-columns">
+                <section class="advice-block">
+                    <div class="block-title"><span>农</span><h4>农艺调控</h4></div>
+                    <ul id="agronomicList"></ul>
+                </section>
+                <section class="advice-block">
+                    <div class="block-title"><span>有</span><h4>有机 / 生物肥</h4></div>
+                    <ul id="organicList"></ul>
+                </section>
+                <section class="advice-block">
+                    <div class="block-title"><span>化</span><h4>化学追施</h4></div>
+                    <ul id="chemicalList"></ul>
+                </section>
+                <section class="advice-block safety-block">
+                    <div class="block-title"><span>安</span><h4>安全与减量</h4></div>
+                    <ul id="safetyList"></ul>
+                </section>
+            </div>
+        </article>
+
+        <div class="evidence-grid">
+            <article class="evidence-card">
+                <div class="mini-heading">
+                    <span>证据链</span>
+                    <small>命中的本地知识术语</small>
+                </div>
+                <div id="evidenceTags" class="evidence-tags"></div>
+                <div id="retrievalMeta" class="retrieval-meta"></div>
+            </article>
+
+            <article class="source-card">
+                <div class="mini-heading">
+                    <span>资料来源</span>
+                    <small>公开科普与推广资料结构化整理</small>
+                </div>
+                <div id="sourceList" class="source-list"></div>
+            </article>
+        </div>
+
+        <aside class="civic-note">
+            <span class="civic-mark" aria-hidden="true">田</span>
+            <div>
+                <strong>科技助农 · 自然融入</strong>
+                <p id="civicNote"></p>
+            </div>
+        </aside>
+    </section>
+
+    <section class="stats-strip" aria-label="现场诊断统计">
+        <div class="stats-heading">
+            <p class="section-kicker">现场看板</p>
+            <h2>农技大数据 · 轻量统计</h2>
+        </div>
+        <div class="stat-card">
+            <span>累计诊断</span>
+            <strong id="statTotal">0</strong>
+        </div>
+        <div class="stat-card">
+            <span>高频缺素</span>
+            <strong id="statTop">暂无</strong>
+        </div>
+        <div class="stat-card">
+            <span>平均检索耗时</span>
+            <strong><i id="statLatency">0</i> ms</strong>
+        </div>
+        <div class="stat-card stat-recent">
+            <span>最近查询</span>
+            <strong id="statRecent">等待第一次诊断</strong>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-brand"><span>禾诊</span> OHCP 农作物缺素症智能体</div>
+    <p>本地知识库优先 · 科学施肥 · 化肥减量增效 · 科技助农</p>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>
+

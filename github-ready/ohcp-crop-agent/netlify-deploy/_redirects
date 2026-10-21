@@ -1,0 +1,5 @@
+# 先部署 Render 后端，然后把下面的地址替换成真实 Render 地址
+/api/*  https://YOUR-BACKEND.onrender.com/api/:splat  200
+
+# 单页应用兜底
+/*  /index.html  200

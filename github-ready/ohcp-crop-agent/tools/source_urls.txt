@@ -1,0 +1,5 @@
+# 将公开的作物营养诊断、测土配方施肥、农技推广文章具体页面放在这里。
+# 脚本会逐行采集，并遵守 robots.txt；比赛演示前请人工核对内容。
+https://www.moa.gov.cn/
+http://www.natesc.org.cn/
+https://www.caas.cn/
